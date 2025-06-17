@@ -313,15 +313,10 @@ export const searchBusinesses = (city, industry, mapRef, isLoaded, setBusinesses
                                 
                                 console.log(`Found ${uniqueEmails.length} emails for ${business.name}, using: ${bestEmail}`);
                                 console.log('All emails found:', uniqueEmails);
-                              } else if (website !== '#') {
-                                // If no emails found, create a guess based on the domain
-                                try {
-                                  const hostname = new URL(website).hostname;
-                                  bestEmail = `info@${hostname.replace('www.', '')}`;
-                                  console.log(`No emails found, guessing: ${bestEmail}`);
-                                } catch (e) {
-                                  // URL parsing error
-                                }
+                              } else {
+                                // If no emails found, don't create a guess
+                                bestEmail = 'N/A';
+                                console.log(`No emails found for ${business.name}, using N/A`);
                               }
                               
                               // Update the business with the found email
@@ -334,22 +329,14 @@ export const searchBusinesses = (city, industry, mapRef, isLoaded, setBusinesses
                               );
                             })().catch(error => {
                               console.error(`Error in scraping process for ${business.name}:`, error);
-                              // Fallback to domain-based email guess
-                              try {
-                                const hostname = new URL(website).hostname;
-                                const possibleEmail = `info@${hostname.replace('www.', '')}`;
-                                
-                                // Update with the guessed email
-                                setBusinesses(prev => 
-                                  prev.map(b => 
-                                    b.id === business.id 
-                                      ? { ...b, email: possibleEmail }
-                                      : b
-                                  )
-                                );
-                              } catch (e) {
-                                // URL parsing error, ignore
-                              }
+                              // Don't guess emails, just use N/A
+                              setBusinesses(prev => 
+                                prev.map(b => 
+                                  b.id === business.id 
+                                    ? { ...b, email: 'N/A' }
+                                    : b
+                                )
+                              );
                             });
                           }
                         }
